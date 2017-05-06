@@ -74,7 +74,7 @@ uint16_t   m_w1_brightness_f   = 0;
 uint16_t   m_w2_brightness_f   = 0;
 
 boolean    m_rgb_state          = false;
-uint16_t   m_rgb_brightness     = 0;
+uint16_t   m_rgb_brightness     = 1023;
 uint8_t    m_rgb_red            = 0;
 uint8_t    m_rgb_green          = 0;
 uint8_t    m_rgb_blue           = 0;
@@ -139,22 +139,21 @@ void effect() {
 void rgbFade() {
   if (m_rgb_state) {
     counter = counter + 1;
-    redLevel = sin(counter/50)*1000;
-    greenLevel = sin(counter/50 + pi*2/3)*1000;
-    blueLevel = sin(counter/50 + pi*4/3)*1000;
-    redLevel = map(redLevel,-1000,1000,0,255);
-    greenLevel = map(greenLevel,-1000,1000,0,255);
-    blueLevel = map(blueLevel,-1000,1000,0,255);
-    //analogWrite(RGB_LIGHT_RED_PIN,redLevel);
-    //analogWrite(RGB_LIGHT_GREEN_PIN,greenLevel);
-    //analogWrite(RGB_LIGHT_BLUE_PIN,blueLevel);
-
-    setColor(redLevel, greenLevel, blueLevel);
+    redLevel = sin(counter/100)*1000;
+    greenLevel = sin(counter/100 + pi*2/3)*1000;
+    blueLevel = sin(counter/100 + pi*4/3)*1000;
+    redLevel = map(redLevel,-1000,1000,0,1023);
+    greenLevel = map(greenLevel,-1000,1000,0,1023);
+    blueLevel = map(blueLevel,-1000,1000,0,1023);
   }
   else {
-    setColor(0, 0, 0);
+    redLevel = 0;
+    greenLevel = 0;
+    blueLevel = 0;
   }
-
+  analogWrite(RGB_LIGHT_RED_PIN,redLevel);
+  analogWrite(RGB_LIGHT_GREEN_PIN,greenLevel);
+  analogWrite(RGB_LIGHT_BLUE_PIN,blueLevel);
 }
 
 void brightnessFadeRGB() {
@@ -382,6 +381,8 @@ void callback(char* p_topic, byte* p_payload, unsigned int p_length) {
       m_rgb_blue = rgb_blue;
     }
 
+    effectState = 1;
+    publishEffectState();
     setColor(m_rgb_red, m_rgb_green, m_rgb_blue);
     publishRGBColor();
   }
@@ -428,12 +429,11 @@ void reconnect() {
 void setup() {
   // init the Serial1
   Serial1.begin(115200);
-  //Serial1.begin(9600);
 
 
   // init the led
-  //pinMode(GREEN_PIN, OUTPUT);
-  //pinMode(RED_PIN, OUTPUT);
+  pinMode(GREEN_PIN, OUTPUT);
+  pinMode(RED_PIN, OUTPUT);
   pinMode(W1_PIN, OUTPUT);
   pinMode(W2_PIN, OUTPUT);
   pinMode(RGB_LIGHT_BLUE_PIN, OUTPUT);
@@ -441,6 +441,7 @@ void setup() {
   pinMode(RGB_LIGHT_GREEN_PIN, OUTPUT);
   setLightState(m_light_brightness);
 
+  digitalWrite(RED_PIN, LOW);
   // init the WiFi connection
   Serial1.println();
   Serial1.println();
@@ -494,6 +495,8 @@ void setup() {
     MDNS.addService("http", "tcp", 80);
 
     Serial1.printf("Ready! Open http://%s.local in your browser\n", host);
+
+    digitalWrite(GREEN_PIN, HIGH);
   } else {
     Serial1.println("WiFi Failed");
   }
