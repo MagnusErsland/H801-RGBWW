@@ -142,9 +142,9 @@ void rgbFade() {
     redLevel = sin(counter/100)*1000;
     greenLevel = sin(counter/100 + pi*2/3)*1000;
     blueLevel = sin(counter/100 + pi*4/3)*1000;
-    redLevel = map(redLevel,-1000,1000,0,1023);
-    greenLevel = map(greenLevel,-1000,1000,0,1023);
-    blueLevel = map(blueLevel,-1000,1000,0,1023);
+    redLevel = map(redLevel,-1000,1000,0,m_rgb_brightness);
+    greenLevel = map(greenLevel,-1000,1000,0,m_rgb_brightness);
+    blueLevel = map(blueLevel,-1000,1000,0,m_rgb_brightness);
   }
   else {
     redLevel = 0;
